@@ -185,7 +185,7 @@ export async function createBookingAction(
       message:
         'Agendamento criado. Envie a mensagem pelo WhatsApp para finalizar.',
       data: {
-        whatsappUrl: `https://wa.me/?text=${encodeURIComponent(message)}`,
+        whatsappUrl: `https://wa.me/5547999535245?text=${encodeURIComponent(message)}`,
       },
     };
   } catch {

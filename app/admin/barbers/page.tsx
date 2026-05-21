@@ -1,4 +1,9 @@
-import { createBarberAction, updateBarberAction } from '@/app/actions/admin';
+import {
+  createBarberAction,
+  deleteBarberAction,
+  updateBarberAction,
+} from '@/app/actions/admin';
+import { AdminImageCard } from '@/components/admin/admin-image-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -37,7 +42,7 @@ export default async function BarbersPage() {
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {barbers.map((barber) => (
-          <Card key={barber.id} className="shadow-none">
+          <AdminImageCard key={barber.id} imageUrl={barber.avatarUrl}>
             <form action={updateBarberAction} className="grid gap-4">
               <input type="hidden" name="id" value={barber.id} />
               <Input name="name" defaultValue={barber.name} required />
@@ -63,7 +68,18 @@ export default async function BarbersPage() {
                 <Button variant="secondary">Salvar</Button>
               </div>
             </form>
-          </Card>
+            <form
+              action={deleteBarberAction}
+              className="mt-4 border-t border-neutral-300 pt-4"
+            >
+              <input type="hidden" name="id" value={barber.id} />
+              <p className="mb-3 text-xs text-neutral-600">
+                Se houver agendamentos vinculados, o barbeiro será apenas
+                desativado para preservar o histórico.
+              </p>
+              <Button variant="ghost">Remover</Button>
+            </form>
+          </AdminImageCard>
         ))}
       </div>
     </main>

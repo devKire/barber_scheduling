@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
 
   // Pastas ignoradas
   globalIgnores([
+    '.claude/**',
     '.next/**',
     'out/**',
     'build/**',

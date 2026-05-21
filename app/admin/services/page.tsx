@@ -1,4 +1,9 @@
-import { createServiceAction, updateServiceAction } from '@/app/actions/admin';
+import {
+  createServiceAction,
+  deleteServiceAction,
+  updateServiceAction,
+} from '@/app/actions/admin';
+import { AdminImageCard } from '@/components/admin/admin-image-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -51,7 +56,7 @@ export default async function ServicesPage() {
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {services.map((service) => (
-          <Card key={service.id} className="shadow-none">
+          <AdminImageCard key={service.id} imageUrl={service.imageUrl}>
             <form action={updateServiceAction} className="grid gap-4">
               <input type="hidden" name="id" value={service.id} />
               <Input name="name" defaultValue={service.name} required />
@@ -94,7 +99,18 @@ export default async function ServicesPage() {
                 <Button variant="secondary">Salvar</Button>
               </div>
             </form>
-          </Card>
+            <form
+              action={deleteServiceAction}
+              className="mt-4 border-t border-neutral-300 pt-4"
+            >
+              <input type="hidden" name="id" value={service.id} />
+              <p className="mb-3 text-xs text-neutral-600">
+                Se houver agendamentos vinculados, o serviço será apenas
+                desativado para preservar o histórico.
+              </p>
+              <Button variant="ghost">Remover</Button>
+            </form>
+          </AdminImageCard>
         ))}
       </div>
     </main>

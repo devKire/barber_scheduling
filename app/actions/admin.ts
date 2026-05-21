@@ -19,6 +19,18 @@ function bool(formData: FormData, key: string) {
   return formData.get(key) === 'on';
 }
 
+function isValidDayOfWeek(dayOfWeek: number) {
+  return Number.isInteger(dayOfWeek) && dayOfWeek >= 0 && dayOfWeek <= 6;
+}
+
+function isValidTime(value: string) {
+  return /^([01]\d|2[0-3]):[0-5]\d$/.test(value);
+}
+
+function isStartBeforeEnd(startTime: string, endTime: string) {
+  return startTime < endTime;
+}
+
 function revalidateAdmin() {
   revalidatePath('/');
   revalidatePath('/book');
@@ -70,6 +82,30 @@ export async function updateBarberAction(formData: FormData) {
   revalidateAdmin();
 }
 
+export async function deleteBarberAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+
+  if (!id) {
+    return;
+  }
+
+  const appointments = await prisma.appointment.count({
+    where: { barberId: id },
+  });
+
+  if (appointments > 0) {
+    await prisma.barber.updateMany({
+      where: { id },
+      data: { isActive: false },
+    });
+  } else {
+    await prisma.barber.deleteMany({ where: { id } });
+  }
+
+  revalidateAdmin();
+}
+
 export async function createServiceAction(formData: FormData) {
   await requireAdmin();
   const name = text(formData, 'name');
@@ -118,6 +154,30 @@ export async function updateServiceAction(formData: FormData) {
   revalidateAdmin();
 }
 
+export async function deleteServiceAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+
+  if (!id) {
+    return;
+  }
+
+  const appointments = await prisma.appointmentService.count({
+    where: { serviceId: id },
+  });
+
+  if (appointments > 0) {
+    await prisma.service.updateMany({
+      where: { id },
+      data: { isActive: false },
+    });
+  } else {
+    await prisma.service.deleteMany({ where: { id } });
+  }
+
+  revalidateAdmin();
+}
+
 export async function createProductAction(formData: FormData) {
   await requireAdmin();
   const name = text(formData, 'name');
@@ -160,6 +220,30 @@ export async function updateProductAction(formData: FormData) {
   revalidateAdmin();
 }
 
+export async function deleteProductAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+
+  if (!id) {
+    return;
+  }
+
+  const appointments = await prisma.appointmentProduct.count({
+    where: { productId: id },
+  });
+
+  if (appointments > 0) {
+    await prisma.product.updateMany({
+      where: { id },
+      data: { isActive: false },
+    });
+  } else {
+    await prisma.product.deleteMany({ where: { id } });
+  }
+
+  revalidateAdmin();
+}
+
 export async function upsertAvailabilityAction(formData: FormData) {
   await requireAdmin();
   const barberId = text(formData, 'barberId');
@@ -167,7 +251,13 @@ export async function upsertAvailabilityAction(formData: FormData) {
   const startTime = text(formData, 'startTime');
   const endTime = text(formData, 'endTime');
 
-  if (!barberId || !Number.isFinite(dayOfWeek) || !startTime || !endTime) {
+  if (
+    !barberId ||
+    !isValidDayOfWeek(dayOfWeek) ||
+    !isValidTime(startTime) ||
+    !isValidTime(endTime) ||
+    !isStartBeforeEnd(startTime, endTime)
+  ) {
     return;
   }
 
@@ -187,7 +277,19 @@ export async function deleteAvailabilityAction(formData: FormData) {
     return;
   }
 
-  await prisma.availability.delete({ where: { id } });
+  await prisma.availability.deleteMany({ where: { id } });
+  revalidateAdmin();
+}
+
+export async function deleteAppointmentAction(formData: FormData) {
+  await requireAdmin();
+  const id = text(formData, 'id');
+
+  if (!id) {
+    return;
+  }
+
+  await prisma.appointment.deleteMany({ where: { id } });
   revalidateAdmin();
 }
 

@@ -1,4 +1,9 @@
-import { createProductAction, updateProductAction } from '@/app/actions/admin';
+import {
+  createProductAction,
+  deleteProductAction,
+  updateProductAction,
+} from '@/app/actions/admin';
+import { AdminImageCard } from '@/components/admin/admin-image-card';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -39,7 +44,7 @@ export default async function ProductsPage() {
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {products.map((product) => (
-          <Card key={product.id} className="shadow-none">
+          <AdminImageCard key={product.id} imageUrl={product.imageUrl}>
             <form action={updateProductAction} className="grid gap-4">
               <input type="hidden" name="id" value={product.id} />
               <Input name="name" defaultValue={product.name} required />
@@ -70,7 +75,18 @@ export default async function ProductsPage() {
                 <Button variant="secondary">Salvar</Button>
               </div>
             </form>
-          </Card>
+            <form
+              action={deleteProductAction}
+              className="mt-4 border-t border-neutral-300 pt-4"
+            >
+              <input type="hidden" name="id" value={product.id} />
+              <p className="mb-3 text-xs text-neutral-600">
+                Se houver agendamentos vinculados, o produto será apenas
+                desativado para preservar o histórico.
+              </p>
+              <Button variant="ghost">Remover</Button>
+            </form>
+          </AdminImageCard>
         ))}
       </div>
     </main>

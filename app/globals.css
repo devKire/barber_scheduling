@@ -1,19 +1,30 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #f3eadc;
-  --foreground: #1b1714;
+  --paper: #efe7d2;
+  --ink: #15140f;
+  --coral: #ed6f5c;
+  --bone: #f7f1de;
   --muted: #d8c8b5;
-  --accent: #8a3d2b;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --accent: var(--coral);
 }
 
 @theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-coral: var(--coral);
+  --color-bone: var(--bone);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
   --color-accent: var(--accent);
-  --font-sans: var(--font-sans);
+  --font-sans: var(--font-inter);
   --font-display: var(--font-display);
+  --font-tight: var(--font-inter-tight);
+  --font-mono: var(--font-mono);
 }
 
 * {
@@ -25,13 +36,17 @@ html {
 }
 
 body {
-  background:
-    linear-gradient(rgba(27, 23, 20, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(27, 23, 20, 0.035) 1px, transparent 1px),
-    var(--background);
-  background-size: 42px 42px;
+  background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), Arial, Helvetica, sans-serif;
+}
+
+.editorial-home {
+  background:
+    linear-gradient(rgba(21, 20, 15, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(21, 20, 15, 0.035) 1px, transparent 1px),
+    var(--paper);
+  background-size: 42px 42px;
 }
 
 ::selection {
@@ -41,4 +56,30 @@ body {
 
 .font-display {
   font-family: var(--font-display), Georgia, serif;
+}
+
+.admin-card-image {
+  animation: admin-card-image-fade 420ms ease-out both;
+}
+
+@keyframes admin-card-image-fade {
+  from {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+
+  to {
+    opacity: 0.35;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .admin-card-image {
+    animation: none;
+  }
 }

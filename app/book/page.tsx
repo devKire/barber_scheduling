@@ -12,7 +12,7 @@ export default async function BookPage() {
     prisma.barber.findMany({
       where: { isActive: true },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, bio: true },
+      select: { id: true, name: true, bio: true, avatarUrl: true },
     }),
     prisma.service.findMany({
       where: { isActive: true },
@@ -23,20 +23,21 @@ export default async function BookPage() {
         description: true,
         duration: true,
         price: true,
+        imageUrl: true,
       },
     }),
     prisma.product.findMany({
       where: { isActive: true },
       orderBy: { name: 'asc' },
-      select: { id: true, name: true, price: true },
+      select: { id: true, name: true, price: true, imageUrl: true },
     }),
   ]);
 
   const hasBookingSetup = barbers.length > 0 && services.length > 0;
 
   return (
-    <main className="mx-auto max-w-7xl px-6 py-8 md:px-10 lg:px-16">
-      <header className="mb-12 flex items-center justify-between border-b border-neutral-950 pb-6">
+    <main className="mx-auto min-h-screen w-full max-w-7xl px-5 py-10 sm:px-8 md:px-12 md:py-12 lg:px-20 lg:py-16">
+      <header className="mb-14 flex items-center justify-between border-b border-neutral-950 pb-6">
         <Link
           href="/"
           className="text-xs font-bold uppercase tracking-[0.32em]"
@@ -47,19 +48,6 @@ export default async function BookPage() {
           <Button variant="ghost">Voltar</Button>
         </Link>
       </header>
-
-      <section className="mb-12 grid gap-8 md:grid-cols-[0.8fr_1.2fr]">
-        <div>
-          <SectionLabel>Agendamento</SectionLabel>
-          <h1 className="font-display text-6xl leading-none tracking-[-0.05em] md:text-8xl">
-            Escolha o ritmo do seu corte.
-          </h1>
-        </div>
-        <p className="max-w-2xl self-end text-lg leading-8 text-neutral-700">
-          Selecione barbeiro, serviços e horário. O pedido nasce pendente e a
-          confirmação final acontece pelo WhatsApp.
-        </p>
-      </section>
 
       {hasBookingSetup ? (
         <BookingForm

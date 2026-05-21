@@ -11,7 +11,10 @@ import { prisma } from '@/lib/prisma';
 
 export default async function AvailabilityPage() {
   const [barbers, availability] = await Promise.all([
-    prisma.barber.findMany({ orderBy: { name: 'asc' } }),
+    prisma.barber.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    }),
     prisma.availability.findMany({
       include: { barber: true },
       orderBy: [{ barber: { name: 'asc' } }, { dayOfWeek: 'asc' }],
@@ -26,7 +29,12 @@ export default async function AvailabilityPage() {
       <h1 className="font-display mt-4 text-6xl leading-none">Horários.</h1>
 
       <Card className="mt-10 shadow-none">
-        <h2 className="font-display text-3xl">Definir disponibilidade</h2>
+        <h2 className="font-display text-3xl">
+          Adicionar ou atualizar horário
+        </h2>
+        <p className="mt-2 text-sm text-neutral-600">
+          Escolher o mesmo barbeiro e dia atualiza o horário existente.
+        </p>
         <form
           action={upsertAvailabilityAction}
           className="mt-6 grid gap-4 md:grid-cols-5"
@@ -54,19 +62,50 @@ export default async function AvailabilityPage() {
 
       <div className="mt-8 grid gap-4 lg:grid-cols-2">
         {availability.map((item) => (
-          <Card
-            key={item.id}
-            className="flex items-center justify-between gap-4 shadow-none"
-          >
-            <div>
-              <h2 className="font-display text-3xl">{item.barber.name}</h2>
-              <p className="text-sm text-neutral-600">
-                {dayNames[item.dayOfWeek]} · {item.startTime} às {item.endTime}
-              </p>
-            </div>
-            <form action={deleteAvailabilityAction}>
+          <Card key={item.id} className="shadow-none">
+            <form action={upsertAvailabilityAction} className="grid gap-4">
+              <div>
+                <h2 className="font-display text-3xl">{item.barber.name}</h2>
+                <p className="text-sm text-neutral-600">
+                  {item.barber.isActive ? 'Ativo' : 'Inativo'} ·{' '}
+                  {dayNames[item.dayOfWeek]} · {item.startTime} às{' '}
+                  {item.endTime}
+                </p>
+              </div>
+              <input type="hidden" name="barberId" value={item.barberId} />
+              <div className="grid gap-4 md:grid-cols-3">
+                <Select
+                  name="dayOfWeek"
+                  defaultValue={String(item.dayOfWeek)}
+                  required
+                >
+                  {dayNames.map((day, index) => (
+                    <option key={day} value={index}>
+                      {day}
+                    </option>
+                  ))}
+                </Select>
+                <Input
+                  name="startTime"
+                  type="time"
+                  defaultValue={item.startTime}
+                  required
+                />
+                <Input
+                  name="endTime"
+                  type="time"
+                  defaultValue={item.endTime}
+                  required
+                />
+              </div>
+              <Button variant="secondary">Salvar horário</Button>
+            </form>
+            <form
+              action={deleteAvailabilityAction}
+              className="mt-4 border-t border-neutral-300 pt-4"
+            >
               <input type="hidden" name="id" value={item.id} />
-              <Button variant="secondary">Remover</Button>
+              <Button variant="ghost">Remover</Button>
             </form>
           </Card>
         ))}
