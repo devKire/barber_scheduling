@@ -1,0 +1,130 @@
+// schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// -----------------------------------------------------------------------------
+// Entidades Principais
+// -----------------------------------------------------------------------------
+
+model Barber {
+  id        String   @id @default(uuid())
+  name      String
+  avatarUrl String?
+  bio       String?  @db.Text
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments Appointment[]
+  schedules    Availability[]
+}
+
+model Service {
+  id          String   @id @default(uuid())
+  name        String
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  imageUrl  String?
+  duration    Int      // Duração em minutos (ex: 30, 45, 60)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  appointments AppointmentService[]
+}
+
+model Product {
+  id        String   @id @default(uuid())
+  name      String
+  price     Decimal  @db.Decimal(10, 2)
+  imageUrl  String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  appointments AppointmentProduct[]
+}
+
+// -----------------------------------------------------------------------------
+// Agendamento e Transações
+// -----------------------------------------------------------------------------
+
+model Appointment {
+  id            String            @id @default(uuid())
+  customerName  String
+  customerPhone String
+  startTime     DateTime
+  endTime       DateTime
+  totalPrice    Decimal           @db.Decimal(10, 2)
+  status        AppointmentStatus @default(PENDING)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  barberId      String
+  barber        Barber            @relation(fields: [barberId], references: [id])
+
+  services      AppointmentService[]
+  products      AppointmentProduct[]
+}
+
+enum AppointmentStatus {
+  PENDING    // Aguardando confirmação (opcional para o seu fluxo via WhatsApp)
+  CONFIRMED  // Confirmado
+  CANCELED   // Cancelado pelo cliente ou admin
+  COMPLETED  // Serviço finalizado
+}
+
+// -----------------------------------------------------------------------------
+// Tabelas Pivô (Relacionamentos Muitos-para-Muitos Explícitos)
+// -----------------------------------------------------------------------------
+
+model AppointmentService {
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  
+  serviceId     String
+  service       Service     @relation(fields: [serviceId], references: [id])
+  
+  // Congela o preço no momento do agendamento
+  priceAtTime   Decimal     @db.Decimal(10, 2) 
+
+  @@id([appointmentId, serviceId])
+}
+
+model AppointmentProduct {
+  appointmentId String
+  appointment   Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+  
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id])
+  
+  quantity      Int         @default(1)
+  
+  // Congela o preço no momento do agendamento
+  priceAtTime   Decimal     @db.Decimal(10, 2) 
+
+  @@id([appointmentId, productId])
+}
+
+// -----------------------------------------------------------------------------
+// Configurações e Horários
+// -----------------------------------------------------------------------------
+
+model Availability {
+  id        String   @id @default(uuid())
+  dayOfWeek Int      // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
+  startTime String   // Formato "HH:mm" (ex: "09:00")
+  endTime   String   // Formato "HH:mm" (ex: "18:00")
+  
+  barberId  String
+  barber    Barber   @relation(fields: [barberId], references: [id], onDelete: Cascade)
+
+  // Um barbeiro só pode ter um registro de horário por dia da semana neste modelo simplificado
+  @@unique([barberId, dayOfWeek])
+}
